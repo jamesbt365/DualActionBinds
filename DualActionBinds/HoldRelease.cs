@@ -70,7 +70,11 @@ namespace OpenTabletDriver.Desktop.Binding
 
             for (int i = 0; i < groups.Length; i++)
             {
-                var newKeys = groups[i].Split(KEYS_SPLITTER, StringSplitOptions.TrimEntries);
+                // Removing empty entries has some advantages over just using key/multi-key bindings.
+                // for example, it will not hold the binding, it will instantly release it.
+                // you can choose to only press on the release of the pen instead of it starting the press
+                // when the pen is actually pressed. 
+                var newKeys = groups[i].Split(KEYS_SPLITTER, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 
                 if (newKeys.Any(k => !Keyboard.SupportedKeys.Contains(k)))
                 {
