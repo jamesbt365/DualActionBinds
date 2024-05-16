@@ -36,15 +36,19 @@ namespace OpenTabletDriver.Desktop.Binding
         public void Press(TabletReference tablet, IDeviceReport report)
         {
             if (keys_press.Count > 0)
+            {
                 Keyboard.Press(keys_press);
-            Keyboard.Release(keys_press);
+                Keyboard.Release(keys_press);
+            }
         }
 
         public void Release(TabletReference tablet, IDeviceReport report)
         {
             if (keys_release.Count > 0)
+            {
                 Keyboard.Press(keys_release);
-            Keyboard.Release(keys_release);
+                Keyboard.Release(keys_release);
+            }
         }
 
         private (IList<string>, IList<string>) ParseKeys(string str)
@@ -67,16 +71,24 @@ namespace OpenTabletDriver.Desktop.Binding
             for (int i = 0; i < groups.Length; i++)
             {
                 var newKeys = groups[i].Split(KEYS_SPLITTER, StringSplitOptions.TrimEntries);
-                if (newKeys.Length > 0 && newKeys.All(k => Keyboard.SupportedKeys.Contains(k)))
+
+                if (newKeys.Any(k => !Keyboard.SupportedKeys.Contains(k)))
                 {
-                    if (i == 0)
-                    {
-                        keysList1.AddRange(newKeys);
-                    }
-                    else
-                    {
-                        keysList2.AddRange(newKeys);
-                    }
+                    var unsupportedKeys = newKeys.Where(k => !Keyboard.SupportedKeys.Contains(k)).ToList();
+                    Log.WriteNotify("DualActionBinds",
+                    $"The following keys are not supported: {string.Join(", ", unsupportedKeys)}" +
+                    "\nNo bindings will be set.");
+                    return (new List<string>(), new List<string>());
+                }
+
+
+                if (i == 0)
+                {
+                    keysList1.AddRange(newKeys);
+                }
+                else
+                {
+                    keysList2.AddRange(newKeys);
                 }
             }
 
